@@ -1,2 +1,5 @@
 db-chroma-index
 venv
+__pycache__
+.vscode
+.idea

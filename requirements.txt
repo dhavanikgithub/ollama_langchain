@@ -2,3 +2,5 @@ langchain_community
 langchain
 chromadb
 unstructured
+langchain-chroma
+langchain_ollama

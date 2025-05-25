@@ -3,9 +3,10 @@ from langchain_community.embeddings import OllamaEmbeddings  # Or langchain_olla
 from langchain_community.vectorstores import Chroma
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 import os
+import constants
 
 # Load all JSON documents in a directory
-def load_json_documents(directory, jq_schema=".inspectiondetails[]"):
+def load_json_documents(directory, jq_schema):
     all_documents = []
 
     for filename in os.listdir(directory):
@@ -23,12 +24,12 @@ def load_json_documents(directory, jq_schema=".inspectiondetails[]"):
     return all_documents
 
 # Load JSON
-json_docs = load_json_documents("./dataset/json", jq_schema=".inspectiondetails[]")
+json_docs = load_json_documents(constants.json_dataset_path, jq_schema=".inspectiondetails[]")
 
 print(f"Loaded {len(json_docs)} inspection records.")
 
 # Embedding setup
-embeddings = OllamaEmbeddings(model="nomic-embed-text:v1.5", show_progress=True)
+embeddings = OllamaEmbeddings(model=constants.ollama_local_embeddings_model, show_progress=True)
 
 # Text splitter
 text_splitter = RecursiveCharacterTextSplitter(
@@ -48,7 +49,7 @@ if texts:
 vectorstore = Chroma.from_documents(
     documents=texts,
     embedding=embeddings,
-    persist_directory="./db-chroma-index"
+    persist_directory=constants.persist_directory_path
 )
 
 print("Vectorstore for JSON inspection data created.")

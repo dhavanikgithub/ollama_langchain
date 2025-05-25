@@ -1,5 +1,5 @@
 
-
+from langchain.retrievers import MultiQueryRetriever
 from langchain_community.embeddings import OllamaEmbeddings
 from langchain_community.vectorstores import Chroma
 from langchain_community.chat_models import ChatOllama
@@ -10,7 +10,7 @@ from langchain.schema.output_parser import StrOutputParser
 import constants
 
 # # Create embeddingsclear
-embeddings = OllamaEmbeddings(model=constants.ollama_local_embeddings_model, show_progress=False)
+embeddings = OllamaEmbeddings(model=constants.ollama_local_embeddings_model, show_progress=True)
 
 db = Chroma(persist_directory=constants.persist_directory_path,
             embedding_function=embeddings)
@@ -30,29 +30,41 @@ llm = ChatOllama(model=local_llm,
                  temperature=0)
 
 # Create prompt template
-template = """<bos><start_of_turn>user\nAnswer the question based only on the following context and extract out a meaningful answer. \
-Please write in full sentences with correct spelling and punctuation. if it makes sense use lists. \
-If the context doen't contain the answer, just respond that you are unable to find an answer. \
+template = """Answer the question based only on the following context:
+{context}
 
-CONTEXT: {context}
+Question: {question}
 
-QUESTION: {question}
-
-<end_of_turn>
-<start_of_turn>model\n
-ANSWER:"""
+Answer: """
 prompt = ChatPromptTemplate.from_template(template)
+
+# Function to print the prompt for a runnable assign
+def print_prompt(input_dict):
+    formatted_prompt = prompt.format(**input_dict)
+    print("Generated Prompt:")
+    print(formatted_prompt)
+    print("-" * 50)
+    return input_dict
+
+# Function to print and pass through the formatted prompt - string output
+def print_and_pass_prompt(formatted_prompt):
+    print("Generated Prompt:")
+    print(formatted_prompt)
+    print("-" * 50)
+    return formatted_prompt
+
 
 # Create the RAG chain using LCEL with prompt printing and streaming output
 rag_chain = (
     {"context": retriever, "question": RunnablePassthrough()}
     | prompt
+    | print_and_pass_prompt
     | llm
 )
 
 # Function to ask questions
 def ask_question(question):
-    print("Answer:\n\n", end=" ", flush=True)
+    print("Answer:", end=" ", flush=True)
     for chunk in rag_chain.stream(question):
         print(chunk.content, end="", flush=True)
     print("\n")
@@ -66,3 +78,7 @@ if __name__ == "__main__":
         answer = ask_question(user_question)
         # print("\nFull answer received.\n")
 
+
+
+
+# # pip install langchain-chroma

@@ -18,7 +18,7 @@ db = Chroma(persist_directory=constants.persist_directory_path,
 # # Create retriever
 retriever = db.as_retriever(
     search_type="similarity",
-    search_kwargs= {"k": 5}
+    search_kwargs= {"k": 500}
 )
 
 # # Create Ollama language model - Gemma 2

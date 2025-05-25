@@ -1,6 +1,7 @@
-langchain_community
+langchain-community
 langchain
 chromadb
 unstructured
 langchain-chroma
-langchain_ollama
+langchain-ollama
+qdrant-client

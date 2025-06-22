@@ -18,10 +18,11 @@ db = Chroma(persist_directory=constants.persist_directory_path,
 # # Create retriever
 retriever = db.as_retriever(
     search_type="similarity",
-    search_kwargs= {"k": 500}
+    search_kwargs= {"k": constants.top_k}
 )
 
-# # Create Ollama language model - Gemma 2
+
+# # Create Ollama language model
 local_llm = constants.ollama_local_llm_model
 
 llm = ChatOllama(model=local_llm,
@@ -51,11 +52,36 @@ rag_chain = (
 )
 
 # Function to ask questions
-def ask_question(question):
+# def ask_question(question):
+#     print("Answer:\n\n", end=" ", flush=True)
+#     for chunk in rag_chain.stream(question):
+#         print(chunk.content, end="", flush=True)
+#     print("\n")
+
+def ask_question(question, filename="qa_log.txt"):
     print("Answer:\n\n", end=" ", flush=True)
-    for chunk in rag_chain.stream(question):
-        print(chunk.content, end="", flush=True)
-    print("\n")
+
+    # Start writing question immediately
+    with open(filename, "a", encoding="utf-8") as f:
+        f.write("<UserQuestion>\n")
+        f.write(question.strip() + "\n")
+        f.write("</UserQuestion>\n")
+        f.write("<ModelAnswer>\n")
+        f.flush()
+        try:
+            for chunk in rag_chain.stream(question):
+                content = chunk.content
+                print(content, end="", flush=True)
+                f.write(content)
+                f.flush()  # Ensure it's written to disk immediately
+        except KeyboardInterrupt:
+            f.write("\n\n[!] Process interrupted. Saving partial answer.\n")
+            f.flush()
+            print("\n[!] Process interrupted. Saving partial answer.\n")
+        finally:
+            f.write("\n</ModelAnswer>\n\n")  # Ensure closing tag is written
+            f.flush()
+            print("\n\nAnswer saved to file.\n\n")
 
 # Example usage
 if __name__ == "__main__":

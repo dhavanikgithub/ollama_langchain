@@ -18,7 +18,7 @@ db = Chroma(persist_directory=constants.persist_directory_path,
 # # Create retriever
 retriever = db.as_retriever(
     search_type="similarity",
-    search_kwargs= {"k": 5}
+    search_kwargs= {"k": constants.top_k}
 )
 
 # # Create Ollama language model - Gemma 2
@@ -78,7 +78,3 @@ if __name__ == "__main__":
         answer = ask_question(user_question)
         # print("\nFull answer received.\n")
 
-
-
-
-# # pip install langchain-chroma

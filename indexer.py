@@ -24,7 +24,7 @@ embeddings = OllamaEmbeddings(model=constants.ollama_local_embeddings_model, sho
 # text_splitter = SemanticChunker(embeddings, breakpoint_threshold_type="interquartile")
 
 text_splitter = RecursiveCharacterTextSplitter(
-    chunk_size=1500,
+    chunk_size=400,
     chunk_overlap=300,
     add_start_index=True,
 )
